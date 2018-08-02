@@ -1,0 +1,40 @@
+pipeline:
+
+  build_s4cmd:
+    image: docker:17.09.0-ce
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker build -t s4cmd:$${DRONE_COMMIT_SHA} .
+    when:
+      branch: master
+      event: [push, tag]
+
+  s4cmd_to_quay:
+    image: docker:17.09.0-ce
+    secrets:
+      - s4cmd_repo_token
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker login -u="ukhomeofficedigital+drone" -p=$${S4CMD_REPO_TOKEN} quay.io
+      - docker tag s4cmd:$${DRONE_COMMIT_SHA} quay.io/ukhomeofficedigital/s4cmd:$${DRONE_COMMIT_SHA}
+      - docker tag s4cmd:$${DRONE_COMMIT_SHA} quay.io/ukhomeofficedigital/s4cmd:latest
+      - docker push quay.io/ukhomeofficedigital/s4cmd:$${DRONE_COMMIT_SHA}
+      - docker push quay.io/ukhomeofficedigital/s4cmd:latest
+    when:
+      branch: master
+      event: push
+
+  tagged_s4cmd_to_quay:
+    image: docker:17.09.0-ce
+    secrets:
+      - s4cmd_repo_token
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker login -u="ukhomeofficedigital+drone" -p=$${S4CMD_REPO_TOKEN} quay.io
+      - docker tag s4cmd:$${DRONE_COMMIT_SHA} quay.io/ukhomeofficedigital/s4cmd:$${DRONE_TAG}
+      - docker push quay.io/ukhomeofficedigital/s4cmd:$${DRONE_TAG}
+    when:
+      event: tag
