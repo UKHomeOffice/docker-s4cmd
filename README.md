@@ -28,12 +28,6 @@ S3_SECRET_KEY=abc+123
 
 All the `s4cmd` commands are documented well on their repo found[here](https://github.com/bloomreach/s4cmd)
 
-To pull the image for the first time:
-
-```
-docker pull xibitdigital/docker-s4cmd
-```
-
 e.g. Running an s4cmd command:
 
 ```
